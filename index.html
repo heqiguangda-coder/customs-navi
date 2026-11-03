@@ -15,6 +15,7 @@
   --paper:#f3f5f4; --sheet:#ffffff; --ink:#18232b; --ink-2:#4b5a63; --rule:#d3dbd8;
   --indigo:#1f3f63; --indigo-soft:#e3eaf2; --seal:#b23a2a; --gain:#1d7a50; --loss:#b23a2a;
   --hl:#fff6d6;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4; --c6:#008300; --c7:#6250d6; --c8:#e34948; --cother:#b4b8b6;
   --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
   --f-body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
@@ -22,10 +23,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#11171b; --sheet:#182127; --ink:#e4ebe9; --ink-2:#9fb0b6; --rule:#2c3a41;
-  --indigo:#8fb3dc; --indigo-soft:#1f2f40; --seal:#ef7e6c; --gain:#5cc596; --loss:#ef7e6c; --hl:#3a3420; color-scheme:dark}}
+  --indigo:#8fb3dc; --indigo-soft:#1f2f40; --seal:#ef7e6c; --gain:#5cc596; --loss:#ef7e6c; --hl:#3a3420; --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300; --c7:#9085e9; --c8:#e66767; --cother:#5a6870; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#11171b; --sheet:#182127; --ink:#e4ebe9; --ink-2:#9fb0b6; --rule:#2c3a41;
-  --indigo:#8fb3dc; --indigo-soft:#1f2f40; --seal:#ef7e6c; --gain:#5cc596; --loss:#ef7e6c; --hl:#3a3420; color-scheme:dark}
+  --indigo:#8fb3dc; --indigo-soft:#1f2f40; --seal:#ef7e6c; --gain:#5cc596; --loss:#ef7e6c; --hl:#3a3420; --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300; --c7:#9085e9; --c8:#e66767; --cother:#5a6870; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
@@ -136,6 +137,19 @@ td.ops{white-space:nowrap}
 td.ops .btn{padding:3px 9px;font-size:.8rem}
 mark{background:var(--hl);color:inherit;border-radius:2px}
 .kids td{background:var(--paper)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;flex:none}
+.sw.off{border:1.5px solid var(--rule);background:transparent}
+.serpick{border:1px solid var(--rule);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.serlist{display:flex;flex-wrap:wrap;gap:6px}
+.serchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:999px;padding:3px 10px 3px 8px;cursor:pointer;font-size:.84rem;background:var(--sheet);max-width:100%}
+.serchip.on{border-color:var(--ink-2);background:var(--paper)}
+.serchip input{position:absolute;opacity:0;pointer-events:none}
+.serchip:has(input:focus-visible){outline:2px solid var(--indigo);outline-offset:2px}
+.serchip .sv{font-family:var(--f-mono);font-size:.75rem;color:var(--ink-2)}
+.chart-wrap{overflow-x:auto}
+.legend{flex-wrap:wrap}
+.other-row td{color:var(--ink-2);font-style:italic}
+.seg.small label{padding:6px 4px;font-size:.85rem}
 @media (max-width:560px){
   .finder th:nth-child(2), .finder td:nth-child(2){display:none}
   .finder td.name{min-width:0;max-width:none}
@@ -200,13 +214,25 @@ footer{font-size:.78rem;color:var(--ink-2);border-top:1px solid var(--rule);padd
     </div>
 
     <div class="field">
-      <span class="lbl"><span class="no">04</span>期間（月別）<button class="q" data-help="period" aria-label="期間の説明">?</button></span>
-      <div class="row">
+      <span class="lbl"><span class="no">04</span>期間<button class="q" data-help="period" aria-label="期間の説明">?</button></span>
+      <div class="seg small" role="radiogroup" aria-label="期間の単位">
+        <label><input type="radio" name="gran" id="granM" value="m" checked>月別</label>
+        <label><input type="radio" name="gran" id="granY" value="y">暦年別</label>
+        <label><input type="radio" name="gran" id="granFY" value="fy">年度別</label>
+      </div>
+      <div class="row" id="perM">
         <input type="month" id="start" value="2026-01" aria-label="開始月">
         <span>〜</span>
         <input type="month" id="end" value="2026-08" aria-label="終了月">
       </div>
-      <label class="check"><input type="checkbox" id="yoy" checked> 前年同月比を計算する<button class="q" data-help="yoy" aria-label="前年同月比の説明">?</button></label>
+      <div class="row" id="perY" hidden>
+        <select id="yStart" aria-label="開始" style="flex:1 1 100px"></select>
+        <span>〜</span>
+        <select id="yEnd" aria-label="終了" style="flex:1 1 100px"></select>
+      </div>
+      <span class="hint" id="perHint"></span>
+      <label class="check"><input type="checkbox" id="yoy" checked> 前年同期比を計算する<button class="q" data-help="yoy" aria-label="前年同期比の説明">?</button></label>
+      <label class="check"><input type="checkbox" id="qtyOn" checked> 数量・単価も取得する<button class="q" data-help="measure" aria-label="数量・単価の説明">?</button></label>
     </div>
 
     <div class="field">
@@ -309,8 +335,16 @@ footer{font-size:.78rem;color:var(--ink-2);border-top:1px solid var(--rule);padd
 const PRISTINE = "<!doctype html>\n" + document.documentElement.outerHTML;
 const EMBED_APPID = /*EMBED*/""/*EMBED*/;
 document.getElementById("nojs").hidden = true;
-const APP = { name:"通関統計ナビ", version:"1.3.0" };
+const APP = { name:"通関統計ナビ", version:"1.4.0" };
 const CHANGELOG = [
+  { v:"1.4.0", date:"2026-11-03", items:[
+    "期間の単位に「暦年別」「年度別（4月〜翌年3月）」を追加。月別と切り替えて集計でき、最長10年まで指定可能",
+    "未公表の月は自動で集計から除き、前年同期も同じ月どうしで比較（例：今年1〜8月と前年1〜8月）",
+    "数量（第1数量・第2数量）と単価（金額÷第1数量）を追加。単位の異なる品目が混ざる場合は「単位混在」と表示",
+    "国別・税関別・HSコード別の表に「上位5／10／20／50件」の選択を追加し、それ以外は「その他」に集約",
+    "期間別の棒グラフを国別・税関別・HSコード別の積み上げに変更。チェックボックスで表示する項目（最大8件）と「その他」の表示を選択可能",
+    "期間別の表に内訳ごとの列を追加し、CSV出力にも反映"
+  ]},
   { v:"1.3.0", date:"2026-11-03", items:[
     "iPhone などで HTML ファイルを直接開いたときに e-Stat へ接続できない問題に対応：通常の通信が拒否された場合、e-Stat 公式の JSONP 方式に自動で切り替えて接続",
     "「接続テスト」ボタンを追加：接続の可否、通信方式、応答時間、うまくいかない場合の確認事項を表示",
@@ -352,8 +386,11 @@ const HELP = {
   appId:["e-Stat アプリケーションID","<p>政府統計の総合窓口 e-Stat の API を使うための利用者ID です。e-Stat にユーザー登録（無料）し、マイページの「API機能（アプリケーションID発行）」で発行できます。</p><p>発行時の「URL」欄は <code>http://test.localhost/</code> など任意の値で構いません。</p><p><a href='https://www.e-stat.go.jp/api/' target='_blank' rel='noopener'>e-Stat API の案内ページ</a></p><p>入力後に「接続テスト」を押すと、e-Stat に接続できるかを確認できます。HTMLファイルを直接開いた場合など通常の通信が使えない環境では、自動的に JSONP 方式（e-Stat 公式の別の接続方式）で接続します。</p><p>入力したIDはこのブラウザ内にだけ保存されます。スマートフォンでHTMLファイルを直接開いた場合など、保存できない環境ではその旨を表示します（画面下の「スマートフォンで使う場合」を参照）。</p>"],
   flow:["貿易区分（輸出・輸入）","<p><b>輸出</b>：日本から外国へ送り出した貨物。金額は FOB 価格（本船渡し価格）で計上されます。</p><p><b>輸入</b>：外国から日本に引き取った貨物。金額は CIF 価格（運賃・保険料込み価格）で計上されます。</p>"],
   level:["集計の単位","<p><b>全国</b>：「品別国別表」を使います。日本全体の合計です。</p><p><b>税関別</b>：「税関別品別国別表」を使い、9つの税関（函館・東京・横浜・名古屋・大阪・神戸・門司・長崎・沖縄地区）ごとの値を集計します。「税関別」タブが表示されます。</p><p>税関別の数値は貨物の通関地によるもので、生産地や仕向地の都道府県とは一致しません。</p>"],
-  period:["期間（月別）","<p>開始月から終了月までの各月を集計します。年をまたぐ指定もできます。</p><p>統計は毎月公表され、<b>速報</b>（翌月中旬〜下旬）→<b>確報</b>（翌々月）→<b>確々報</b>・<b>確定</b>（翌年以降）と順に改訂されます。直近月は速報値を含むことがあり、まだ公表されていない月は「未公表」と表示します。</p>"],
-  yoy:["前年同月比","<p>当月の値を前年の同じ月と比べた増減率です。</p><p>前年同月比（%）＝（当月 ÷ 前年同月 − 1）× 100</p><p>前年同月が 0 で当月に実績がある場合は<b>皆増</b>、当月が 0 になった場合は<b>皆減</b>と表示します（貿易統計の慣例表記）。期間全体の比較は「前年同期比」として同じ式で計算します。</p>"],
+  period:["期間","<p><b>月別</b>：開始月〜終了月の各月を集計します。</p><p><b>暦年別</b>：1月〜12月を1年として、指定した年ごとに集計します。</p><p><b>年度別</b>：4月〜翌年3月を1年度として集計します（例：2025年度＝2025年4月〜2026年3月）。</p><p>最長10年（120か月）まで指定できます。統計は毎月公表され、<b>速報</b>→<b>確報</b>→<b>確定</b>と改訂されます。まだ公表されていない月は自動的に集計から除き、その年・年度は公表済みの月までで集計します（表に「1〜8月」などと表示）。</p>"],
+  yoy:["前年同期比","<p>当期の値を前年の同じ期間と比べた増減率です。月別なら前年同月、暦年・年度なら前年・前年度との比較です。</p><p>前年同期比（%）＝（当期 ÷ 前年同期 − 1）× 100</p><p>当期が公表済みの月までしかない場合（例：今年は1〜8月）、前年も同じ1〜8月だけで比べます。前年同期が 0 で当期に実績がある場合は<b>皆増</b>、当期が 0 になった場合は<b>皆減</b>と表示します。</p>"],
+  measure:["表示する値（金額・数量・単価）","<p><b>金額</b>：輸出はFOB、輸入はCIF価格（千円単位）。</p><p><b>数量</b>：統計品目ごとに決められた単位（KG＝キログラム、NO＝個数、MT＝メートルトン、L＝リットルなど）で計上されます。品目によっては第2数量（例：個数と重量）もあります。</p><p><b>単価</b>：金額 ÷ 第1数量で計算した平均単価（円／数量単位）です。</p><p>単位の異なる品目は足し合わせられないため、範囲内に複数の単位が混ざると「単位混在」と表示します。数量・単価はHSコードを9桁や6桁で絞り込んだときに意味のある値になります。</p><p>「数量・単価も取得する」をオンにすると、取得件数が約3倍になります。</p>"],
+  topn:["上位","<p>当期の値が大きい順に、選んだ件数だけを表示し、残りは「その他（◯件）」の1行にまとめます。並べ替えをしても「その他」は常に最後に表示されます。</p><p>単価を表示しているときは、金額の大きい順で上位を選びます。</p>"],
+  stack:["内訳（積み上げグラフ）","<p>期間ごとの棒グラフを、国別・税関別・HSコード別に色分けして積み上げます。</p><p>下に並ぶ一覧のチェックで、グラフに表示する項目を選べます（最大8件）。色は項目ごとに固定され、選び直しても変わりません。「残りを『その他』で表示」をオンにすると、選ばなかった分を灰色でまとめて積み上げます。</p><p>点線は前年同期の合計です。単価は足し合わせられないため積み上げず、全体の単価を表示します。</p>"],
   hs:["HSコード","<p>HS（Harmonized System：商品の名称及び分類についての統一システム）による品目分類です。日本の統計品目番号は9桁です。</p><dl><dt>2桁</dt><dd>類（例：87 車両）</dd><dt>4桁</dt><dd>項（例：8703 乗用自動車）</dd><dt>6桁</dt><dd>号。ここまでが国際共通</dd><dt>9桁</dt><dd>日本独自の統計細分</dd></dl><p>輸出と輸入では9桁目までの細分が異なります（輸出統計品目表・輸入統計品目表）。</p>"],
   country:["国・地域","<p>貿易統計の国コード（3桁）で集計します。輸出は仕向国、輸入は原産国が基準です。</p><p>例：105 中華人民共和国、304 アメリカ合衆国、103 大韓民国、106 台湾、601 オーストラリア。</p>"],
   customs:["税関","<p>全国の通関は9つの税関に分かれています：函館・東京・横浜・名古屋・大阪・神戸・門司・長崎・沖縄地区税関。各税関は管内の支署・出張所の分を含みます。</p><p>例えば成田空港は東京税関、関西空港は大阪税関、中部空港は名古屋税関の管内です。</p>"],
@@ -404,7 +441,7 @@ const HEADINGS = Object.fromEntries(Object.entries(H4).map(([k,v])=>[k,v[0]]));
 const sectionOf = ch => { const n=+ch; return SECTIONS.find(s=>n>=s[0]&&n<=s[1]); };
 
 /* ---------- 状態 ---------- */
-const S = { appId:"", hs:[], countries:[], customs:[], demo:false, ctrl:null, meta:new Map(), lists:new Map(), result:null, unit:"m", tab:"month", hsLv:4, sort:{} };
+const S = { appId:"", hs:[], countries:[], customs:[], demo:false, ctrl:null, meta:new Map(), lists:new Map(), result:null, unit:"m", tab:"period", hsLv:4, sort:{}, measure:"amt", topN:10, stack:{ by:"cty", sel:{cty:[],cus:[],hs:[]}, colors:{cty:{},cus:{},hs:{}}, other:true } };
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const store = { get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
@@ -536,13 +573,19 @@ function yearsInTitle(t){
   while((m=re.exec(t))){ if(m[1]){ for(let y=+m[1]; y<=+m[2]; y++) ys.add(y);} else ys.add(+m[3]); }
   return ys;
 }
+// 表題の「(1-8月：確報、9月：輸入9桁速報)2026年」から、年ごとの公表済み最終月を読み取る
+function lastMonthsInTitle(t){
+  const out={}; const s=String(t).normalize("NFKC"); const re=/\(([^()]*)\)\s*(\d{4})年(?!\s*[～〜~ー－-])/g; let m;
+  while((m=re.exec(s))){ const nums=[...m[1].matchAll(/(\d{1,2})(?=\s*月)|-(\d{1,2})/g)].map(x=>+(x[1]||x[2])).filter(n=>n>=1&&n<=12); if(nums.length) out[+m[2]]=Math.max(...nums); }
+  return out;
+}
 async function listTables(flow, lv){
   const key = flow+lv; if (S.lists.has(key)) return S.lists.get(key);
   const kind = KIND(lv);
   const { root } = await estat("getStatsList", { statsCode:"00350300", searchWord:`${kind} AND ${flow}`, limit:500 });
   const tabs = arr(root.DATALIST_INF?.TABLE_INF).map(t=>{
     const title = [txt(t.STATISTICS_NAME), txt(t.TITLE), txt(t.TITLE_SPEC?.TABLE_NAME)].join(" ");
-    return { id:t["@id"], title, open:txt(t.OPEN_DATE), rank:rankTitle(title), years:yearsInTitle(txt(t.TITLE)||title) };
+    return { id:t["@id"], title, open:txt(t.OPEN_DATE), rank:rankTitle(title), years:yearsInTitle(txt(t.TITLE)||title), lastMonth:lastMonthsInTitle(txt(t.TITLE)||title) };
   }).filter(t=>{
     const s=t.title;
     if (!s.includes(flow) || !s.includes(kind)) return false;
@@ -567,8 +610,14 @@ async function getMeta(id){
     else if (o.name.includes("国")) m.cty=o;
   }
   if (!m.time || !m.measure || !m.comm || !m.cty) throw new Error("統計表の構造を判別できませんでした（"+id+"）。");
-  m.monthCode = {};
-  for (const i of m.measure.items){ const mm=i.name.replace(/[０-９]/g,d=>"０１２３４５６７８９".indexOf(d)).match(/^(\d{1,2})月[_＿]?金額/); if(mm) m.monthCode[+mm[1]]=i.code; }
+  m.mcode = { amt:{}, q1:{}, q2:{} }; m.unitCode = {};
+  for (const i of m.measure.items){
+    const nm = String(i.name).normalize("NFKC").replace(/\s/g,"");
+    const mm = nm.match(/^(\d{1,2})月[_]?(金額|数量1|数量2)$/);
+    if (mm){ m.mcode[{ "金額":"amt", "数量1":"q1", "数量2":"q2" }[mm[2]]][+mm[1]] = i.code; continue; }
+    const um = nm.match(/^単位([12])$/); if (um) m.unitCode[um[1]] = i.code;
+  }
+  m.monthCode = m.mcode.amt;
   m.yearCode = {};
   for (const i of m.time.items){ const y=i.name.match(/(\d{4})/); if(y) m.yearCode[+y[1]]=i.code; }
   S.meta.set(id, m); return m;
@@ -728,11 +777,46 @@ $("#embedId").onclick = embedIdFile;
 renderCustoms(); renderChips();
 
 /* ---------- 期間 ---------- */
+const GRAN_LABEL = { m:"月別", y:"暦年別", fy:"年度別" };
+const granVal = () => document.querySelector('input[name="gran"]:checked')?.value || "m";
 function monthsBetween(a,b){
   let [y,m]=a.split("-").map(Number); const [y2,m2]=b.split("-").map(Number); const out=[];
-  while(y<y2 || (y===y2&&m<=m2)){ out.push({y,m}); if(++m>12){m=1;y++;} if(out.length>120) break; }
+  while(y<y2 || (y===y2&&m<=m2)){ out.push({y,m}); if(++m>12){m=1;y++;} if(out.length>240) break; }
   return out;
 }
+function buildMonths(g){
+  if (g==="m"){
+    const s=$("#start").value, e=$("#end").value;
+    if (!s||!e||s>e) return { err:"期間を正しく指定してください（開始月 ≦ 終了月）。" };
+    return { months:monthsBetween(s,e) };
+  }
+  const ys=+$("#yStart").value, ye=+$("#yEnd").value;
+  if (!(ys<=ye)) return { err:"期間を正しく指定してください（開始 ≦ 終了）。" };
+  const out=[];
+  for (let y=ys; y<=ye; y++){
+    if (g==="y") for (let m=1;m<=12;m++) out.push({y,m});
+    else { for (let m=4;m<=12;m++) out.push({y,m}); for (let m=1;m<=3;m++) out.push({y:y+1,m}); }
+  }
+  return { months:out };
+}
+const ymIdx = (y,m) => y*12+m;
+const bucketKey = (y,m,g) => g==="m" ? `${y}-${String(m).padStart(2,"0")}` : g==="y" ? String(y) : `${m>=4?y:y-1}FY`;
+function bucketLabel(key,g){ if(g==="m"){ const [y,m]=key.split("-"); return `${y}年${+m}月`; } if(g==="y") return `${key}年`; return `${parseInt(key)}年度`; }
+function bucketShort(key,g){ if(g==="m") return key.slice(2).replace("-","/"); if(g==="y") return key; return `${parseInt(key)}FY`; }
+(function initPeriod(){
+  const now = new Date(), cy = now.getFullYear();
+  const opts = sfx => { let h=""; for (let y=cy; y>=2010; y--) h+=`<option value="${y}">${y}${sfx}</option>`; return h; };
+  const setSfx = () => {
+    const g = granVal(), sfx = g==="fy" ? "年度" : "年";
+    const a=$("#yStart").value || String(cy-2), b=$("#yEnd").value || String(g==="fy"?cy-1:cy);
+    $("#yStart").innerHTML = opts(sfx); $("#yEnd").innerHTML = opts(sfx);
+    $("#yStart").value = a; $("#yEnd").value = b;
+    $("#perM").hidden = g!=="m"; $("#perY").hidden = g==="m";
+    $("#perHint").textContent = g==="m" ? "開始月〜終了月の各月を集計します。" : g==="y" ? "1月〜12月を1年として集計します。" : "4月〜翌年3月を1年度として集計します（例：2025年度＝2025年4月〜2026年3月）。";
+  };
+  document.querySelectorAll('input[name="gran"]').forEach(r=>r.addEventListener("change", setSfx));
+  setSfx();
+})();
 
 /* ---------- 取得 ---------- */
 const MAX_RECORDS = 400000;
@@ -741,7 +825,6 @@ async function fetchReal(q){
   log(`統計表を検索：${kind}（${q.flow}）`);
   const tabs = await listTables(q.flow, q.lv);
   if (!tabs.length) throw new Error(`e-Stat で「${kind}（${q.flow}）」が見つかりませんでした。`);
-  // 年ごとに統計表を割り当て（確速→確報→確定、新しい順）
   const need = new Set(q.years), plan = [];
   for (const t of tabs){
     if (!need.size) break;
@@ -754,22 +837,34 @@ async function fetchReal(q){
   if (need.size) log(`  ※ ${[...need].join("・")}年の表は見つかりませんでした`);
   if (!plan.length) throw new Error("指定期間を含む統計表が見つかりませんでした。");
 
-  // 件数の事前確認
+  // 公表済みの最終月（表題の「(1-8月：確報)2026年」などから判定）
+  let lastPub = null;
+  for (const p of plan) for (const y of p.years){
+    const lm = p.t.lastMonth?.[y] ?? 12;
+    if (!lastPub || ymIdx(y,lm) > ymIdx(lastPub.y,lastPub.m)) lastPub = { y, m:lm };
+  }
+
   const reqs = [];
   for (const p of plan){
     const m=p.m, base = { statsDataId:p.t.id, metaGetFlg:"N" };
     base[paramKey(m.time.id)] = p.years.map(y=>m.yearCode[y]).join(",");
     const months = [...new Set(q.monthsByYear.filter(x=>p.years.includes(x.y)).map(x=>x.m))];
-    base[paramKey(m.measure.id)] = months.map(x=>m.monthCode[x]).filter(Boolean).join(",");
+    const codes = [];
+    for (const mo of months){
+      if (m.mcode.amt[mo]) codes.push(m.mcode.amt[mo]);
+      if (q.qty){ if (m.mcode.q1[mo]) codes.push(m.mcode.q1[mo]); if (m.mcode.q2[mo]) codes.push(m.mcode.q2[mo]); }
+    }
+    if (q.qty){ if (m.unitCode[1]) codes.push(m.unitCode[1]); if (m.unitCode[2]) codes.push(m.unitCode[2]); }
+    base[paramKey(m.measure.id)] = codes.join(",");
     if (q.countries.length) base[paramKey(m.cty.id)] = q.countries.join(",");
     if (q.lv==="customs" && m.cus && q.customs.length) base[paramKey(m.cus.id)] = q.customs.join(",");
     const groups = [];
     if (!q.hs.length) groups.push({});
     else for (const h of q.hs){
-      const codes = m.comm.items.filter(i=>i.code.startsWith(h)).map(i=>i.code);
-      if (!codes.length){ log(`  HS ${h} に該当する品目がこの表にありません`); continue; }
-      if (codes.length<=100) groups.push({ [paramKey(m.comm.id)]:codes.join(",") });
-      else groups.push({ [paramKey(m.comm.id,"From")]:codes[0], [paramKey(m.comm.id,"To")]:codes[codes.length-1], _prefix:h });
+      const cs = m.comm.items.filter(i=>i.code.startsWith(h)).map(i=>i.code);
+      if (!cs.length){ log(`  HS ${h} に該当する品目がこの表にありません`); continue; }
+      if (cs.length<=100) groups.push({ [paramKey(m.comm.id)]:cs.join(",") });
+      else groups.push({ [paramKey(m.comm.id,"From")]:cs[0], [paramKey(m.comm.id,"To")]:cs[cs.length-1], _prefix:h });
     }
     for (const g of groups) reqs.push({ p, params:{...base, ...g} });
   }
@@ -780,77 +875,111 @@ async function fetchReal(q){
     r.count = +(root.STATISTICAL_DATA?.RESULT_INF?.TOTAL_NUMBER||0); total += r.count;
   }
   log(`取得予定件数：${total.toLocaleString()} 件`);
-  if (total > MAX_RECORDS) throw new Error(`取得件数が ${total.toLocaleString()} 件と多すぎます（上限 ${MAX_RECORDS.toLocaleString()} 件）。HSコードや国を指定して絞り込んでください。`);
+  if (total > MAX_RECORDS) throw new Error(`取得件数が ${total.toLocaleString()} 件と多すぎます（上限 ${MAX_RECORDS.toLocaleString()} 件）。HSコードや国で絞り込むか、期間を短くしてください${q.qty?"。「数量・単価も取得」を外すと件数は約3分の1になります":""}。`);
 
-  const rows = []; let done=0;
+  const acc = new Map(), units = {}; let done=0;
   for (const r of reqs){
     if (!r.count) continue;
     const m=r.p.m, { _prefix, ...pp } = r.params;
-    const rev = (o)=>{ const x={}; for(const [k,v] of Object.entries(o)) x[v]=+k; return x; };
-    const yOf = rev(m.yearCode), mOf = rev(m.monthCode);
+    const yOf = {}; for (const [y,c] of Object.entries(m.yearCode)) yOf[c]=+y;
+    const fOf = {};
+    for (const f of ["amt","q1","q2"]) for (const [mo,c] of Object.entries(m.mcode[f])) fOf[c] = { f, mo:+mo };
+    const uOf = {}; for (const [n,c] of Object.entries(m.unitCode)) uOf[c] = "u"+n;
     let start = 1;
     while (start){
       const { root } = await estat("getStatsData", { ...pp, startPosition:start, limit:100000 });
       const sd = root.STATISTICAL_DATA;
       for (const v of arr(sd?.DATA_INF?.VALUE)){
-        const val = parseFloat(String(v.$).replace(/,/g,"")); if (!isFinite(val)) continue;
         const c = v["@"+m.comm.id]; if (_prefix && !c.startsWith(_prefix)) continue;
-        const y = yOf[v["@"+m.time.id]], mo = mOf[v["@"+m.measure.id]]; if(!y||!mo) continue;
-        rows.push({ c, n:v["@"+m.cty.id], k: m.cus ? v["@"+m.cus.id] : "", y, m:mo, v:val });
+        const mc = v["@"+m.measure.id];
+        if (uOf[mc]){ const u = String(v.$??"").normalize("NFKC").trim(); if (u && u!=="-" && u!=="***"){ (units[c] ||= {})[uOf[mc]] = u; } continue; }
+        const fm = fOf[mc]; if (!fm) continue;
+        const val = parseFloat(String(v.$).replace(/,/g,"")); if (!isFinite(val)) continue;
+        const y = yOf[v["@"+m.time.id]]; if (!y) continue;
+        const n = v["@"+m.cty.id], k = m.cus ? v["@"+m.cus.id] : "";
+        const key = `${c}|${n}|${k}|${y}|${fm.mo}`;
+        let o = acc.get(key); if (!o){ o = { c, n, k, y, m:fm.mo, v:0, q1:0, q2:0 }; acc.set(key,o); }
+        if (fm.f==="amt") o.v += val; else o[fm.f] += val;
       }
       done += arr(sd?.DATA_INF?.VALUE).length;
       status(`取得中… ${done.toLocaleString()} / ${total.toLocaleString()} 件`);
       start = sd?.RESULT_INF?.NEXT_KEY ? +sd.RESULT_INF.NEXT_KEY : 0;
     }
   }
-  // 名称辞書
   const names = { cty:{}, cus:{}, comm:{} };
   for (const p of plan){
     p.m.cty.items.forEach(i=>names.cty[i.code]=cleanName(i.name));
     p.m.cus?.items.forEach(i=>names.cus[i.code]=cleanName(i.name));
     p.m.comm.items.forEach(i=>{ const n=cleanName(i.name); if(n && !/^\d+$/.test(n)) names.comm[i.code]=n; });
   }
-  return { rows, names, tables:plan.map(p=>`${p.t.id}（${p.years.join("・")}年）`) };
+  return { rows:[...acc.values()], units, names, lastPub, tables:plan.map(p=>`${p.t.id}（${p.years.join("・")}年）`) };
 }
 
 /* ---------- サンプル（架空） ---------- */
 function fetchDemo(q){
-  const ctys = [["105","中華人民共和国"],["304","アメリカ合衆国"],["103","大韓民国"],["106","台湾"],["111","タイ"],["601","オーストラリア"],["213","ドイツ"],["147","アラブ首長国連邦"]];
+  const ctys = [["105","中華人民共和国"],["304","アメリカ合衆国"],["103","大韓民国"],["106","台湾"],["111","タイ"],["601","オーストラリア"],["213","ドイツ"],["147","アラブ首長国連邦"],["112","シンガポール"],["118","インドネシア"]];
   const cus = [["1","函館"],["2","東京"],["3","横浜"],["4","名古屋"],["5","大阪"],["6","神戸"],["7","門司"],["8","長崎"],["9","沖縄地区"]];
-  const comm = ["870323910","870324100","870899000","854231000","848620000","847130000","271121000","300490000","290220000","720851000"];
+  const comm = [["870323910","NO",3.0e3],["870380000","NO",4.5e3],["870899000","KG",1.2],["854231000","NO",0.9],["848620000","NO",2.6e5],["847130000","NO",80],["271121000","MT",90],["300490000","KG",22],["290220000","KG",0.15],["720851000","MT",120]];
+  const lastPub = { y:2026, m:8 };
   let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
-  const rows=[];
-  for (const {y,m} of q.monthsByYear) for (const [n] of ctys) for (const c of comm) for (const [k] of (q.lv==="customs"?cus:[["",""]])){
-    if (rnd()<0.35) continue;
-    const base = 2e6*(1+comm.indexOf(c)%4)*(1+ctys.findIndex(x=>x[0]===n)%3)/(q.lv==="customs"?4:1);
-    rows.push({ c, n, k, y, m, v: Math.round(base*(0.6+rnd()*0.8)*(1+(y-2024)*0.06)*(1+Math.sin(m)*0.08)) });
+  const rows=[], units={};
+  comm.forEach(([c,u])=>units[c]={u1:u});
+  const uniq = [...new Map(q.monthsByYear.map(x=>[ymIdx(x.y,x.m),x])).values()];
+  for (const {y,m} of uniq){
+    if (ymIdx(y,m) > ymIdx(lastPub.y,lastPub.m)) continue;
+    for (const [n] of ctys) for (const [c,,price] of comm) for (const [k] of (q.lv==="customs"?cus:[["",""]])){
+      if (rnd()<0.35) continue;
+      const ci = comm.findIndex(x=>x[0]===c), ni = ctys.findIndex(x=>x[0]===n);
+      const base = 2e4*(1+ci%4)*(1+ni%3)/(1+ni*0.25)/(q.lv==="customs"?4:1);
+      const v = Math.round(base*(0.6+rnd()*0.8)*(1+(y-2024)*0.06)*(1+Math.sin(m)*0.08));
+      const p = price*(1+(y-2024)*0.04)*(0.9+rnd()*0.2);
+      rows.push({ c, n, k, y, m, v, q1: Math.round(v/p), q2:0 });
+    }
   }
   const f = rows.filter(r=>(!q.hs.length||q.hs.some(h=>r.c.startsWith(h))) && (!q.countries.length||q.countries.includes(r.n)) && (!q.customs.length||q.customs.includes(r.k)));
-  return { rows:f, names:{ cty:Object.fromEntries(ctys), cus:Object.fromEntries(cus), comm:{} }, tables:["（架空のサンプルデータ）"], ctys, cus };
+  return { rows:f, units, lastPub, names:{ cty:Object.fromEntries(ctys), cus:Object.fromEntries(cus), comm:{} }, tables:["（架空のサンプルデータ）"], ctys, cus };
 }
 $("#demoBtn").onclick = ()=>{
   S.demo = true; const d = fetchDemo({ monthsByYear:[], lv:"customs", hs:[], countries:[], customs:[] });
   fillChoices(d.ctys.map(([code,name])=>({code,name})), d.cus.map(([code,name])=>({code,name})));
-  $("#ctyHint").textContent="サンプル用の国候補です。"; run();
+  $("#ctyHint").textContent="サンプル用の国候補です。";
+  $("#qtyOn").checked = true;
+  $("#lvCus").checked = true; $("#cusField").hidden = false;
+  run();
 };
 
 /* ---------- 実行 ---------- */
+function computeEff(q, data){
+  // 公表済みの月までに絞り、前年同期も同じ月どうしで比べる
+  let last = data.lastPub ? ymIdx(data.lastPub.y, data.lastPub.m) : 0;
+  if (!last) for (const r of data.rows) last = Math.max(last, ymIdx(r.y,r.m));
+  const now = new Date(); last = Math.min(last || Infinity, ymIdx(now.getFullYear(), now.getMonth()+1));
+  const months = q.months.filter(x=>ymIdx(x.y,x.m) <= last);
+  const excluded = q.months.filter(x=>ymIdx(x.y,x.m) > last);
+  const prev = q.yoy ? months.map(x=>({y:x.y-1, m:x.m})) : [];
+  return { months, prev, excluded, curSet:new Set(months.map(x=>ymIdx(x.y,x.m))), prevSet:new Set(prev.map(x=>ymIdx(x.y,x.m))) };
+}
 async function run(){
-  const start=$("#start").value, end=$("#end").value;
-  if (!start||!end||start>end){ status("期間を正しく指定してください（開始月 ≦ 終了月）。", true); return; }
-  const months = monthsBetween(start,end);
-  if (months.length>60){ status("期間は60か月以内で指定してください。", true); return; }
-  const yoy = $("#yoy").checked;
+  const g = granVal(), b = buildMonths(g);
+  if (b.err){ status(b.err, true); return; }
+  const months = b.months;
+  if (months.length>120){ status("期間は最長10年（120か月）までで指定してください。", true); return; }
+  const yoy = $("#yoy").checked, qty = $("#qtyOn").checked;
   const prev = yoy ? months.map(x=>({y:x.y-1,m:x.m})) : [];
   const all = [...months, ...prev];
-  const q = { flow:flowVal(), lv:lvVal(), months, prev, yoy, monthsByYear:all, years:[...new Set(all.map(x=>x.y))].sort(),
+  const q = { flow:flowVal(), lv:lvVal(), gran:g, months, yoy, qty, monthsByYear:all, years:[...new Set(all.map(x=>x.y))].sort(),
               hs:[...S.hs], countries:[...S.countries], customs: lvVal()==="customs" ? [...S.customs] : [] };
   if (!S.demo && !S.appId){ status("e-Stat のアプリケーションIDを入力して「保存」を押してください（または「サンプルで試す」）。", true); return; }
   $("#log").textContent=""; S.ctrl = new AbortController();
   $("#runBtn").disabled=true; $("#stopBtn").hidden=false; status("取得しています…");
   try{
     const data = S.demo ? fetchDemo(q) : await fetchReal(q);
-    S.result = { q, ...data, demo:S.demo }; S.sort={};
+    const eff = computeEff(q, data);
+    if (!eff.months.length) throw new Error("指定した期間のデータはまだ公表されていません。期間を見直してください。");
+    S.result = { q, ...data, eff, demo:S.demo }; S.sort={};
+    if (!qty && ["q1","q2","up1"].includes(S.measure)) S.measure = "amt";
+    S.stack.sel = { cty:[], cus:[], hs:[] }; S.stack.colors = { cty:{}, cus:{}, hs:{} };
+    if (S.stack.by==="cus" && q.lv!=="customs") S.stack.by = "cty";
     status(`${data.rows.length.toLocaleString()} 件を集計しました。`);
     render();
   }catch(e){
@@ -862,52 +991,105 @@ $("#stopBtn").onclick = ()=>S.ctrl?.abort();
 
 /* ---------- 集計 ---------- */
 const UNITS = { k:[1,"千円",0], m:[1e3,"百万円",0], o:[1e5,"億円",1] };
+const MEAS = { amt:"金額", q1:"数量（第1数量）", q2:"数量（第2数量）", up1:"単価（金額÷第1数量）" };
 function fmt(v){ const [d,,dp]=UNITS[S.unit]; return (v/d).toLocaleString("ja-JP",{minimumFractionDigits:dp,maximumFractionDigits:dp}); }
+const newAgg = () => ({ amt:0, q1:0, q2:0, u1:new Set(), u2:new Set() });
+function addRow(a, row){
+  a.amt += row.v||0; a.q1 += row.q1||0; a.q2 += row.q2||0;
+  const u = S.result.units?.[row.c];
+  if (row.q1) a.u1.add(u?.u1 || "単位不明");
+  if (row.q2) a.u2.add(u?.u2 || "単位不明");
+}
+function mergeAgg(t, s){ t.amt+=s.amt; t.q1+=s.q1; t.q2+=s.q2; s.u1.forEach(x=>t.u1.add(x)); s.u2.forEach(x=>t.u2.add(x)); }
+// 表示する値（金額・数量・単価）
+function mval(a, meas=S.measure){
+  if (!a) return { v:0, ok:true };
+  if (meas==="amt") return { v:a.amt, ok:true };
+  if (meas==="q1" || meas==="q2"){
+    const us = meas==="q1" ? a.u1 : a.u2;
+    if (us.size>1) return { v:null, ok:false, why:"単位混在" };
+    return { v:a[meas], ok:true, unit:[...us][0]||"" };
+  }
+  if (a.u1.size>1) return { v:null, ok:false, why:"単位混在" };
+  if (!a.q1) return { v:null, ok:false, why:"—" };
+  return { v:a.amt*1000/a.q1, ok:true, unit:[...a.u1][0]||"" };
+}
+function fmtNum(v, meas=S.measure){
+  if (meas==="amt") return fmt(v);
+  if (meas==="up1") return v.toLocaleString("ja-JP",{ maximumFractionDigits: v<10?3: v<1000?1:0 });
+  return Math.round(v).toLocaleString("ja-JP");
+}
+const fmtM = mv => (!mv.ok || mv.v==null) ? (mv.why||"—") : fmtNum(mv.v);
+function unitLabel(mv){
+  if (S.measure==="amt") return UNITS[S.unit][1];
+  if (S.measure==="up1") return "円／" + (mv?.unit || "数量単位");
+  return mv?.unit || "";
+}
+const summable = () => S.measure!=="up1";
 function yoyCell(cur, prev){
   if (!S.result.q.yoy) return { t:"", c:"", v:null };
-  if (!prev && !cur) return { t:"—", c:"", v:null };
-  if (!prev) return { t:"皆増", c:"up", v:Infinity };
-  if (!cur) return { t:"皆減", c:"down", v:-100 };
-  const p=(cur/prev-1)*100; return { t:(p>0?"+":"")+p.toFixed(1)+"%", c:p>=0?"up":"down", v:p };
+  if (!cur.ok || !prev.ok) return { t:"—", c:"", v:null };
+  const c = cur.v||0, p = prev.v||0;
+  if (!p && !c) return { t:"—", c:"", v:null };
+  if (!p) return { t:"皆増", c:"up", v:Infinity };
+  if (!c) return { t:"皆減", c:"down", v:-100 };
+  const r=(c/p-1)*100; return { t:(r>0?"+":"")+r.toFixed(1)+"%", c:r>=0?"up":"down", v:r };
 }
 function aggregate(keyFn){
-  const r=S.result, cur=new Set(r.q.months.map(x=>x.y+"-"+x.m)), prv=new Set(r.q.prev.map(x=>x.y+"-"+x.m));
-  const map=new Map();
-  for (const row of r.rows){
-    const ym=row.y+"-"+row.m, isC=cur.has(ym), isP=prv.has(ym); if(!isC&&!isP) continue;
-    const k=keyFn(row); let o=map.get(k); if(!o){o={k,cur:0,prev:0};map.set(k,o);}
-    if(isC) o.cur+=row.v; if(isP) o.prev+=row.v;
+  const E=S.result.eff, map=new Map();
+  for (const row of S.result.rows){
+    const i=ymIdx(row.y,row.m), isC=E.curSet.has(i), isP=E.prevSet.has(i); if(!isC&&!isP) continue;
+    const k=keyFn(row); let o=map.get(k); if(!o){ o={ k, cur:newAgg(), prev:newAgg() }; map.set(k,o); }
+    if (isC) addRow(o.cur,row); if (isP) addRow(o.prev,row);
   }
   return [...map.values()];
 }
+const rankOf = o => S.measure==="q1" ? o.cur.q1 : S.measure==="q2" ? o.cur.q2 : o.cur.amt;
 function hsName(code){
   const r=S.result; if (code.length===9 && r?.names.comm[code]) return r.names.comm[code];
   if (code.length>=6 && H6[code.slice(0,6)]) return H6[code.slice(0,6)][0] + (code.length>6?"（の細分）":"");
   if (code.length>=4 && HEADINGS[code.slice(0,4)]) return HEADINGS[code.slice(0,4)] + (code.length>4?"（の細分）":"");
   return (CHAPTERS[code.slice(0,2)]||"") + (code.length>2?"（の細分）":"");
 }
+const DIMS = {
+  cty: { label:"国別", key:x=>x.n, name:k=>S.result.names.cty[k]||k },
+  cus: { label:"税関別", key:x=>x.k, name:k=>S.result.names.cus[k]||k },
+  hs:  { label:"HSコード別", key:x=>x.c.slice(0,S.hsLv), name:k=>hsName(k) }
+};
+function periodLabel(){
+  const q=S.result.q, E=S.result.eff, a=E.months[0], b=E.months.at(-1);
+  if (q.gran==="m") return `${a.y}年${a.m}月〜${b.y}年${b.m}月`;
+  const ka=bucketKey(a.y,a.m,q.gran), kb=bucketKey(b.y,b.m,q.gran);
+  const s = ka===kb ? bucketLabel(ka,q.gran) : `${bucketLabel(ka,q.gran)}〜${bucketLabel(kb,q.gran)}`;
+  return E.excluded.length ? `${s}（${b.y}年${b.m}月まで）` : s;
+}
 
 /* ---------- 描画 ---------- */
 function render(){
-  const r=S.result, q=r.q; if(!r) return;
-  const tot = aggregate(()=>"all")[0] || {cur:0,prev:0};
-  const pubMonths = new Set(r.rows.map(x=>x.y+"-"+x.m));
-  const missing = q.months.filter(x=>!pubMonths.has(x.y+"-"+x.m));
-  const y = yoyCell(tot.cur, tot.prev);
-  const lbl = `${q.months[0].y}年${q.months[0].m}月〜${q.months.at(-1).y}年${q.months.at(-1).m}月`;
-  const tabs = [["month","月別"],["cty","国別"],...(q.lv==="customs"?[["cus","税関別"]]:[]),["hs","HSコード別"]];
-  if (!tabs.find(t=>t[0]===S.tab)) S.tab="month";
+  const r=S.result, q=r.q, E=r.eff; if(!r) return;
+  const totA = aggregate(()=>"all")[0] || { cur:newAgg(), prev:newAgg() };
+  const cur = mval(totA.cur), prv = mval(totA.prev), y = yoyCell(cur, prv);
+  const pub = new Set(r.rows.map(x=>ymIdx(x.y,x.m)));
+  const missing = E.months.filter(x=>!pub.has(ymIdx(x.y,x.m)));
+  const tabs = [["period",GRAN_LABEL[q.gran]],["cty","国別"],...(q.lv==="customs"?[["cus","税関別"]]:[]),["hs","HSコード別"]];
+  if (!tabs.find(t=>t[0]===S.tab)) S.tab="period";
   const cond = [q.flow, q.lv==="customs"?"税関別":"全国", q.hs.length?"HS "+q.hs.join("・"):"全品目", q.countries.length?q.countries.map(c=>r.names.cty[c]||c).join("・"):"全ての国"];
+  const ex = E.excluded;
+  const totLbl = S.measure==="up1" ? "平均単価" : S.measure==="amt" ? "当期合計" : "当期数量";
+  const unitTxt = unitLabel(cur.ok?cur:prv);
+  let diff = "";
+  if (q.yoy && cur.ok && prv.ok && summable()){ const d=(cur.v||0)-(prv.v||0); diff = `<div class="kpi"><div class="k">増減</div><div class="v ${d>=0?"up":"down"}">${(d>=0?"+":"")+fmtNum(d)}</div><div class="s">${esc(unitTxt)}</div></div>`; }
   $("#results").innerHTML = `
     ${r.demo?`<div class="notice" data-kind="demo">表示中の数値は画面確認用の<b>架空のサンプルデータ</b>です。実際の統計ではありません。</div>`:""}
-    ${missing.length?`<div class="notice">データがない月：${missing.map(x=>x.y+"年"+x.m+"月").join("、")}（未公表、または該当する実績なし）</div>`:""}
-    <div style="display:flex;flex-direction:column;gap:12px;margin-top:${(r.demo||missing.length)?"12px":"0"}">
+    ${ex.length?`<div class="notice">${ex[0].y}年${ex[0].m}月〜${ex.at(-1).y}年${ex.at(-1).m}月は未公表のため集計から除いています。前年同期も同じ月どうしで比べています。</div>`:""}
+    ${missing.length?`<div class="notice">実績がない月：${missing.map(x=>x.y+"年"+x.m+"月").join("、")}</div>`:""}
+    ${!q.qty?``:(S.measure!=="amt" && !cur.ok)?`<div class="notice">選んだ範囲には数量の単位が異なる品目が混ざっているため、合計の数量・単価は計算できません。HSコード別（9桁）で見るか、HSコードを絞り込んでください。</div>`:""}
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
     <div class="hint">${esc(cond.join(" ／ "))}　｜　使用表：${esc(r.tables.join("、"))}<button class="q" data-help="table" aria-label="使用する統計表の説明">?</button></div>
     <div class="kpis">
-      <div class="kpi"><div class="k">当期合計（${lbl}）</div><div class="v">${fmt(tot.cur)}</div><div class="s">${UNITS[S.unit][1]}</div></div>
-      ${q.yoy?`<div class="kpi"><div class="k">前年同期</div><div class="v">${fmt(tot.prev)}</div><div class="s">${UNITS[S.unit][1]}</div></div>
-      <div class="kpi"><div class="k">増減額</div><div class="v ${tot.cur>=tot.prev?"up":"down"}">${(tot.cur>=tot.prev?"+":"")+fmt(tot.cur-tot.prev)}</div><div class="s">${UNITS[S.unit][1]}</div></div>
-      <div class="kpi"><div class="k">前年同期比<button class="q" data-help="yoy" aria-label="前年同期比の説明">?</button></div><div class="v ${y.c}">${y.t}</div><div class="s">${tot.cur>=tot.prev?"増加":"減少"}</div></div>`:""}
+      <div class="kpi"><div class="k">${totLbl}（${esc(periodLabel())}）</div><div class="v">${fmtM(cur)}</div><div class="s">${esc(unitTxt)}</div></div>
+      ${q.yoy?`<div class="kpi"><div class="k">前年同期</div><div class="v">${fmtM(prv)}</div><div class="s">${esc(unitTxt)}</div></div>${diff}
+      <div class="kpi"><div class="k">前年同期比<button class="q" data-help="yoy" aria-label="前年同期比の説明">?</button></div><div class="v ${y.c}">${y.t}</div><div class="s">${y.v==null?"":y.v>=0?"増加":"減少"}</div></div>`:""}
     </div>
     <div class="ledger">
       <div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button role="tab" type="button" data-tab="${k}" aria-selected="${S.tab===k}">${n}</button>`).join("")}</div>
@@ -916,78 +1098,223 @@ function render(){
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); });
   renderPanel();
 }
-function toolbar(extra, helpKey){
-  return `<div class="toolbar"><div class="row">${extra||""}
-    <label class="row" style="gap:6px"><span class="lbl" style="margin:0">表示単位<button class="q" data-help="unit" aria-label="表示単位の説明">?</button></span>
-    <select id="unitSel" style="width:auto">${Object.entries(UNITS).map(([k,u])=>`<option value="${k}" ${S.unit===k?"selected":""}>${u[1]}</option>`).join("")}</select></label>
-    ${helpKey?`<button class="q" data-help="${helpKey}" aria-label="説明">?</button>`:""}</div>
+function controls(extra){
+  const q=S.result.q;
+  const ms = Object.entries(MEAS).filter(([k])=>k==="amt"||q.qty);
+  return `<div class="toolbar"><div class="row">
+    <label class="row" style="gap:6px"><span class="lbl" style="margin:0">表示する値<button class="q" data-help="measure" aria-label="表示する値の説明">?</button></span>
+      <select id="measSel" style="width:auto">${ms.map(([k,n])=>`<option value="${k}" ${S.measure===k?"selected":""}>${n}</option>`).join("")}</select></label>
+    ${S.measure==="amt"?`<label class="row" style="gap:6px"><span class="lbl" style="margin:0">単位<button class="q" data-help="unit" aria-label="表示単位の説明">?</button></span>
+      <select id="unitSel" style="width:auto">${Object.entries(UNITS).map(([k,u])=>`<option value="${k}" ${S.unit===k?"selected":""}>${u[1]}</option>`).join("")}</select></label>`:""}
+    ${extra||""}</div>
     <div class="row"><button class="btn" id="csvBtn" type="button">CSV出力</button><button class="q" data-help="csv" aria-label="CSV出力の説明">?</button></div></div>`;
 }
 let CURRENT_TABLE = null;
+function bindControls(){
+  $("#measSel").onchange = e=>{ S.measure=e.target.value; render(); };
+  const u=$("#unitSel"); if(u) u.onchange = e=>{ S.unit=e.target.value; render(); };
+  const lv=$("#hsLv"); if(lv) lv.onchange=e=>{ S.hsLv=+e.target.value; S.stack.sel.hs=[]; S.stack.colors.hs={}; renderPanel(); };
+  const tp=$("#topSel"); if(tp) tp.onchange=e=>{ S.topN=+e.target.value; renderPanel(); };
+  $("#csvBtn").onclick = exportCsv;
+}
+const hsLvSel = () => `<label class="row" style="gap:6px"><span class="lbl" style="margin:0">集計桁<button class="q" data-help="hslevel" aria-label="集計桁の説明">?</button></span><select id="hsLv" style="width:auto">${[2,4,6,9].map(n=>`<option value="${n}" ${S.hsLv===n?"selected":""}>${n}桁</option>`).join("")}</select></label>`;
 function renderPanel(){
-  const r=S.result, q=r.q, P=$("#panel"); let html="", rows=[], cols;
-  if (S.tab==="month"){
-    const m = new Map(); for (const row of r.rows){ const k=row.y+"-"+row.m; m.set(k,(m.get(k)||0)+row.v); }
-    rows = q.months.map(x=>{ const cur=m.get(x.y+"-"+x.m)||0, prev=m.get((x.y-1)+"-"+x.m)||0; return { key:`${x.y}-${String(x.m).padStart(2,"0")}`, name:`${x.y}年${x.m}月`, cur, prev }; });
-    html = toolbar("", "monthly") + chartSvg(rows);
-    cols = [["name","年月"],["cur","当月","n"],...(q.yoy?[["prev","前年同月","n"],["yoy","前年同月比","n"]]:[])];
-  } else {
-    let keyFn, nameFn, extra="", codeCol=false;
-    if (S.tab==="cty"){ keyFn=x=>x.n; nameFn=k=>r.names.cty[k]||k; }
-    else if (S.tab==="cus"){ keyFn=x=>x.k; nameFn=k=>r.names.cus[k]||k; }
-    else { const L=S.hsLv; keyFn=x=>x.c.slice(0,L); nameFn=hsName; codeCol=true;
-      extra = `<label class="row" style="gap:6px"><span class="lbl" style="margin:0">集計桁<button class="q" data-help="hslevel" aria-label="集計桁の説明">?</button></span><select id="hsLv" style="width:auto">${[2,4,6,9].map(n=>`<option value="${n}" ${S.hsLv===n?"selected":""}>${n}桁</option>`).join("")}</select></label>`; }
-    const tot = aggregate(()=>"all")[0]?.cur || 0;
-    rows = aggregate(keyFn).map(o=>({ key:o.k, name:nameFn(o.k), cur:o.cur, prev:o.prev, share: tot? o.cur/tot*100 : 0, code:codeCol }));
-    html = toolbar(extra);
-    cols = [["key","コード"],["name","名称"],["cur","当期","n"],...(q.yoy?[["prev","前年同期","n"],["yoy","前年同期比","n"]]:[]),["share","構成比","n"]];
+  if (S.tab==="period") return renderPeriod();
+  const r=S.result, q=r.q, P=$("#panel"), D=DIMS[S.tab];
+  const extra = (S.tab==="hs"?hsLvSel():"") + `<label class="row" style="gap:6px"><span class="lbl" style="margin:0">上位<button class="q" data-help="topn" aria-label="上位の説明">?</button></span>
+    <select id="topSel" style="width:auto">${[5,10,20,50,0].map(n=>`<option value="${n}" ${S.topN===n?"selected":""}>${n?`上位${n}`:"すべて"}</option>`).join("")}</select></label>`;
+  let groups = aggregate(D.key).sort((a,b)=>rankOf(b)-rankOf(a));
+  const totAgg = newAgg(); groups.forEach(o=>mergeAgg(totAgg,o.cur));
+  const totV = mval(totAgg);
+  let other = null;
+  if (S.topN && groups.length > S.topN){
+    const rest = groups.slice(S.topN); groups = groups.slice(0, S.topN);
+    other = { k:"", cur:newAgg(), prev:newAgg(), n:rest.length }; rest.forEach(o=>{ mergeAgg(other.cur,o.cur); mergeAgg(other.prev,o.prev); });
   }
-  rows.forEach(x=>x.yoy=yoyCell(x.cur,x.prev));
-  const sk = S.sort[S.tab] || (S.tab==="month"?null:{k:"cur",d:-1});
-  if (sk) rows.sort((a,b)=>{ const va=sk.k==="yoy"?(a.yoy.v??-1e9):a[sk.k], vb=sk.k==="yoy"?(b.yoy.v??-1e9):b[sk.k]; return (va>vb?1:va<vb?-1:0)*sk.d; });
-  CURRENT_TABLE = { rows, cols };
-  const maxCur = Math.max(1,...rows.map(x=>x.cur));
-  const body = rows.length ? rows.map(x=>`<tr>${cols.map(([k,,cls])=>{
+  const mk = (o, isOther) => { const c=mval(o.cur), p=mval(o.prev);
+    return { key:isOther?"":o.k, name:isOther?`その他（${o.n}件）`:D.name(o.k), cur:c, prev:p, yoy:yoyCell(c,p),
+      share: summable() && totV.ok && totV.v && c.ok ? c.v/totV.v*100 : null, other:isOther, code:S.tab==="hs"&&!isOther }; };
+  let rows = groups.map(o=>mk(o,false));
+  const sk = S.sort[S.tab] || { k:"cur", d:-1 };
+  const sv = (x,k) => k==="yoy" ? (x.yoy.v ?? -1e15) : k==="cur"||k==="prev" ? (x[k].ok ? x[k].v : -1e15) : k==="share" ? (x.share??-1) : x[k];
+  rows.sort((a,b)=>{ const va=sv(a,sk.k), vb=sv(b,sk.k); return (va>vb?1:va<vb?-1:0)*sk.d; });
+  if (other) rows.push(mk(other,true));
+  const showUnitCol = S.measure!=="amt";
+  const cols = [["key","コード"],["name","名称"],["cur","当期","n"],...(q.yoy?[["prev","前年同期","n"],["yoy","前年同期比","n"]]:[]),...(showUnitCol?[["unit","単位"]]:[]),...(summable()?[["share","構成比","n"]]:[])];
+  const unitHead = S.measure==="amt" ? `（${UNITS[S.unit][1]}）` : "";
+  const body = rows.length ? rows.map(x=>`<tr class="${x.other?"other-row":""}">${cols.map(([k,,cls])=>{
       if (k==="key") return `<td>${x.code?`<button class="code" type="button" data-hs="${esc(x.key)}">${esc(x.key)}</button>`:`<span style="font-family:var(--f-mono)">${esc(x.key)}</span>`}</td>`;
       if (k==="name") return `<td class="name">${esc(x.name)}</td>`;
       if (k==="yoy") return `<td class="n ${x.yoy.c}">${x.yoy.t}</td>`;
-      if (k==="share") return `<td class="n">${x.share.toFixed(1)}% <span class="bar" style="width:${Math.max(2,x.share*0.6)}px"></span></td>`;
-      if (k==="cur" && S.tab==="month") return `<td class="n">${fmt(x.cur)}</td>`;
-      return `<td class="n">${fmt(x[k])}</td>`;
+      if (k==="unit") return `<td>${esc(unitLabel(x.cur.ok?x.cur:x.prev))}</td>`;
+      if (k==="share") return `<td class="n">${x.share==null?"—":x.share.toFixed(1)+"%"} ${x.share!=null?`<span class="bar" style="width:${Math.max(2,x.share*0.6)}px"></span>`:""}</td>`;
+      return `<td class="n">${fmtM(x[k])}</td>`;
     }).join("")}</tr>`).join("") : `<tr><td colspan="${cols.length}" class="empty">該当するデータがありません。</td></tr>`;
-  html += `<div class="tbl-wrap"><table><thead><tr>${cols.map(([k,n,cls])=>`<th class="${cls||""} ${sk&&sk.k===k?(sk.d>0?"asc":"desc"):""}" data-sort="${k}">${n}${k==="share"?'<button class="q" data-help="share" aria-label="構成比の説明">?</button>':""}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
-  P.innerHTML = html;
-  $("#unitSel").onchange = e=>{ S.unit=e.target.value; render(); };
-  const lv=$("#hsLv"); if(lv) lv.onchange=e=>{ S.hsLv=+e.target.value; renderPanel(); };
-  $("#csvBtn").onclick = exportCsv;
+  CURRENT_TABLE = { head: cols.map(c=>c[1] + ((c[0]==="cur"||c[0]==="prev")&&S.measure==="amt"?"（千円）":"")),
+    rows: rows.map(x=>cols.map(([k])=> k==="key"?x.key : k==="name"?x.name : k==="yoy"?x.yoy.t : k==="unit"?unitLabel(x.cur.ok?x.cur:x.prev) : k==="share"?(x.share==null?"":x.share.toFixed(2)) : (x[k].ok&&x[k].v!=null ? (S.measure==="up1"? +x[k].v.toFixed(3) : Math.round(x[k].v)) : x[k].why||"")) ) };
+  P.innerHTML = controls(extra) + `<div class="tbl-wrap"><table><thead><tr>${cols.map(([k,n,cls])=>`<th class="${cls||""} ${sk.k===k?(sk.d>0?"asc":"desc"):""}" ${k!=="unit"?`data-sort="${k}"`:""}>${n}${(k==="cur"||k==="prev")?unitHead:""}${k==="share"?'<button class="q" data-help="share" aria-label="構成比の説明">?</button>':""}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>
+    ${other?`<p class="hint">上位${S.topN}件以外の${other.n}件を「その他」にまとめています（並べ替えの対象外で、常に最後に表示）。</p>`:""}`;
+  bindControls();
   P.querySelectorAll("th[data-sort]").forEach(th=>th.onclick=e=>{ if(e.target.closest(".q")) return; const k=th.dataset.sort; const c=S.sort[S.tab]; S.sort[S.tab] = { k, d: c&&c.k===k ? -c.d : (k==="name"||k==="key"?1:-1) }; renderPanel(); });
 }
-function chartSvg(rows){
-  const W=640,H=250,L=58,R=12,T=14,B=34, n=rows.length; if(!n) return "";
-  const d=UNITS[S.unit][0], max=Math.max(1,...rows.flatMap(x=>[x.cur,S.result.q.yoy?x.prev:0]))/d;
-  const step = Math.pow(10,Math.floor(Math.log10(max))), nice=[1,2,2.5,5,10].map(s=>s*step).find(s=>max/s<=5)||step*10;
-  const top = Math.ceil(max/nice)*nice, ys=v=>T+(H-T-B)*(1-v/top), bw=(W-L-R)/n;
-  let g="";
-  for(let v=0; v<=top+1e-9; v+=nice){ g+=`<line x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${ys(v)+4}" text-anchor="end">${v.toLocaleString("ja-JP",{maximumFractionDigits:1})}</text>`; }
-  rows.forEach((x,i)=>{ const cx=L+bw*i+bw/2, w=Math.min(34,bw*0.62), v=x.cur/d;
-    g+=`<rect x="${cx-w/2}" y="${ys(v)}" width="${w}" height="${Math.max(0,ys(0)-ys(v))}" fill="var(--indigo)" opacity=".85"><title>${x.name} 当月 ${fmt(x.cur)}</title></rect>`;
-    if (n<=24 || i%Math.ceil(n/12)===0) g+=`<text x="${cx}" y="${H-B+16}" text-anchor="middle">${x.key.slice(2).replace("-","/")}</text>`; });
-  if (S.result.q.yoy){
-    const pts=rows.map((x,i)=>[L+bw*i+bw/2, ys(x.prev/d)]);
-    g+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--seal)" stroke-width="2"/>`;
-    g+=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--sheet)" stroke="var(--seal)" stroke-width="2"><title>${rows[i].name} 前年同月 ${fmt(rows[i].prev)}</title></circle>`).join("");
+
+/* ---------- 期間別（積み上げグラフ） ---------- */
+const SERIES_MAX = 8;
+function stackDimOptions(){
+  const q=S.result.q;
+  return [["none","なし"],["cty","国別"],...(q.lv==="customs"?[["cus","税関別"]]:[]),["hs","HSコード別"]];
+}
+function freeSlot(by){ const used=new Set(Object.values(S.stack.colors[by])); for(let i=1;i<=SERIES_MAX;i++) if(!used.has(i)) return i; return 0; }
+function renderPeriod(){
+  const r=S.result, q=r.q, E=r.eff, P=$("#panel"), g=q.gran;
+  // 期間の区切り
+  const buckets=[], bOf=new Map(), pOf=new Map();
+  for (const {y,m} of E.months){
+    const k=bucketKey(y,m,g); let b=buckets.find(x=>x.key===k);
+    if (!b){ b={ key:k, months:[] }; buckets.push(b); }
+    b.months.push({y,m}); bOf.set(ymIdx(y,m), b); if (q.yoy) pOf.set(ymIdx(y-1,m), b);
   }
-  const legend = `<div class="row hint" style="gap:16px"><span><span class="bar" style="width:14px;height:10px;border-radius:2px"></span> 当月</span>${S.result.q.yoy?`<span style="color:var(--seal)">●— 前年同月</span>`:""}<span>単位：${UNITS[S.unit][1]}</span></div>`;
-  return `<div style="overflow-x:auto"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="月別推移グラフ" style="min-width:420px">${g}</svg></div>${legend}`;
+  const full = g==="m" ? 1 : 12;
+  buckets.forEach(b=>{ b.partial = b.months.length < full; b.cur=newAgg(); b.prev=newAgg(); b.ser=new Map(); b.oth={cur:newAgg(),prev:newAgg()}; });
+  const by = S.stack.by, D = by!=="none" ? DIMS[by] : null;
+  // 系列の候補（当期の大きい順）
+  let cand = [];
+  if (D){
+    cand = aggregate(D.key).sort((a,b)=>rankOf(b)-rankOf(a));
+    const sel = S.stack.sel[by];
+    if (!sel.length){ cand.slice(0,5).forEach(o=>{ sel.push(o.k); S.stack.colors[by][o.k]=freeSlot(by); }); }
+  }
+  const selSet = new Set(D ? S.stack.sel[by] : []);
+  for (const row of r.rows){
+    const i=ymIdx(row.y,row.m), bc=bOf.get(i), bp=pOf.get(i);
+    if (!bc && !bp) continue;
+    const sk = D ? D.key(row) : null, inSel = D && selSet.has(sk);
+    for (const [b, f] of [[bc,"cur"],[bp,"prev"]]){
+      if (!b) continue;
+      addRow(b[f], row);
+      if (D){
+        if (inSel){ let s=b.ser.get(sk); if(!s){ s={cur:newAgg(),prev:newAgg()}; b.ser.set(sk,s); } addRow(s[f], row); }
+        else addRow(b.oth[f], row);
+      }
+    }
+  }
+  const showOther = S.stack.other;
+  const unitsOk = S.measure==="amt" || (S.measure!=="up1" && buckets.every(b=>mval(b.cur).ok));
+  const canStack = D && summable() && unitsOk;
+  // 表
+  const serKeys = D ? S.stack.sel[by] : [];
+  const cols = [["name", g==="m"?"年月":g==="y"?"年":"年度"]];
+  if (D){ serKeys.forEach(k=>cols.push(["s:"+k, D.name(k), "n"])); if (showOther && summable()) cols.push(["oth","その他","n"]); }
+  cols.push(["cur", D ? (summable() ? (showOther?"合計":"選択分の計") : "全体") : "当期", "n"]);
+  if (q.yoy) cols.push(["prev","前年同期","n"],["yoy","前年同期比","n"]);
+  const rows = buckets.map(b=>{
+    const lab = bucketLabel(b.key,g) + (b.partial && g!=="m" ? `（${b.months[0].m}〜${b.months.at(-1).m}月）` : "");
+    let cA=b.cur, pA=b.prev;
+    if (D && summable() && !showOther){ cA=newAgg(); pA=newAgg(); for (const k of serKeys){ const s=b.ser.get(k); if(s){ mergeAgg(cA,s.cur); mergeAgg(pA,s.prev); } } }
+    const c=mval(cA), p=mval(pA);
+    const o = { key:b.key, name:lab, short:bucketShort(b.key,g), cur:c, prev:p, yoy:yoyCell(c,p), ser:{} };
+    serKeys.forEach(k=>o.ser[k]=mval(b.ser.get(k)?.cur));
+    o.oth = mval(b.oth.cur);
+    return o;
+  });
+  // 系列の選択
+  let picker = "";
+  if (D){
+    const shown = cand.slice(0, Math.max(20, serKeys.length));
+    const extraSel = serKeys.filter(k=>!shown.find(o=>o.k===k));
+    const list = [...shown, ...extraSel.map(k=>({k, cur:newAgg()}))];
+    picker = `<div class="serpick" id="serPick">
+      <div class="row hint" style="justify-content:space-between"><span>グラフに表示する${esc(D.label.replace("別",""))}（最大${SERIES_MAX}件、大きい順）</span>
+      <label class="check"><input type="checkbox" id="othChk" ${showOther?"checked":""}> 残りを「その他」で表示</label></div>
+      <div class="serlist">${list.map(o=>{ const on=selSet.has(o.k), slot=S.stack.colors[by][o.k];
+        return `<label class="serchip ${on?"on":""}"><input type="checkbox" data-ser="${esc(o.k)}" ${on?"checked":""}>${on?`<span class="sw" style="background:var(--c${slot})"></span>`:`<span class="sw off"></span>`}<span>${esc(D.name(o.k))}</span><span class="sv">${esc(fmtM(mval(o.cur)))}</span></label>`; }).join("")}</div></div>`;
+  }
+  const extra = `<label class="row" style="gap:6px"><span class="lbl" style="margin:0">内訳<button class="q" data-help="stack" aria-label="内訳の説明">?</button></span>
+    <select id="stackBy" style="width:auto">${stackDimOptions().map(([k,n])=>`<option value="${k}" ${by===k?"selected":""}>${n}</option>`).join("")}</select></label>` + (by==="hs"?hsLvSel():"");
+  let note = "";
+  if (D && !summable()) note = "単価は足し合わせられないため、グラフは全体の単価を表示します。各国などの単価は下の表で確認できます。";
+  else if (D && !unitsOk) note = "数量の単位が異なる品目が混ざっているため、積み上げグラフは表示できません。HSコードを絞り込んでください。";
+  const head = cols.map(c=>c[1] + ((c[0]!=="name"&&c[0]!=="yoy")&&S.measure==="amt"?"（千円）":""));
+  CURRENT_TABLE = { head, rows: rows.map(x=>cols.map(([k])=>{
+    const raw = mv => mv && mv.ok && mv.v!=null ? (S.measure==="up1"? +mv.v.toFixed(3) : Math.round(mv.v)) : (mv?.why||"");
+    if (k==="name") return x.name; if (k==="yoy") return x.yoy.t; if (k==="oth") return raw(x.oth); if (k.startsWith("s:")) return raw(x.ser[k.slice(2)]); return raw(x[k]); })) };
+  const body = rows.map(x=>`<tr>${cols.map(([k])=>{
+    if (k==="name") return `<td>${esc(x.name)}</td>`;
+    if (k==="yoy") return `<td class="n ${x.yoy.c}">${x.yoy.t}</td>`;
+    if (k==="oth") return `<td class="n">${fmtM(x.oth)}</td>`;
+    if (k.startsWith("s:")) return `<td class="n">${fmtM(x.ser[k.slice(2)])}</td>`;
+    return `<td class="n">${fmtM(x[k])}</td>`; }).join("")}</tr>`).join("");
+  const unitTxt = unitLabel(rows.find(x=>x.cur.ok&&x.cur.unit)?.cur);
+  P.innerHTML = controls(extra) + picker + (note?`<p class="hint">${note}</p>`:"") +
+    chartStack(rows, canStack ? serKeys : [], canStack && showOther, by, unitTxt) +
+    `<div class="tbl-wrap"><table><thead><tr>${cols.map(([k,n,cls])=>`<th class="${cls||""}" style="cursor:default">${k.startsWith("s:")?`<span class="sw" style="background:var(--c${S.stack.colors[by][k.slice(2)]})"></span> `:""}${esc(n)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
+  bindControls();
+  $("#stackBy").onchange = e=>{ S.stack.by = e.target.value; renderPanel(); };
+  const oc=$("#othChk"); if (oc) oc.onchange = e=>{ S.stack.other = e.target.checked; renderPanel(); };
+  P.querySelectorAll("[data-ser]").forEach(cb=>cb.onchange=e=>{
+    const k=cb.dataset.ser, sel=S.stack.sel[by];
+    if (cb.checked){
+      if (sel.length>=SERIES_MAX){ cb.checked=false; status(`グラフに表示できるのは${SERIES_MAX}件までです。ほかの項目を外してから選んでください。`, true); return; }
+      sel.push(k); S.stack.colors[by][k]=freeSlot(by);
+    } else { S.stack.sel[by]=sel.filter(x=>x!==k); delete S.stack.colors[by][k]; }
+    renderPanel();
+  });
+}
+function chartStack(rows, serKeys, withOther, by, unitTxt){
+  const q=S.result.q, n=rows.length; if(!n) return "";
+  const W=Math.max(640, n*26+80), H=260, R=12, T=14, B=36;
+  const scale = S.measure==="amt" ? UNITS[S.unit][0] : 1;
+  const segs = rows.map(x=>{
+    if (!serKeys.length) return [{ k:"_tot", v: x.cur.ok ? (x.cur.v||0)/scale : 0, color:"var(--indigo)", label: q.gran==="m"?"当月":"当期", raw:x.cur }];
+    const s = serKeys.map(k=>({ k, v: x.ser[k].ok ? (x.ser[k].v||0)/scale : 0, color:`var(--c${S.stack.colors[by][k]})`, label:DIMS[by].name(k), raw:x.ser[k] }));
+    if (withOther) s.push({ k:"_oth", v: x.oth.ok ? (x.oth.v||0)/scale : 0, color:"var(--cother)", label:"その他", raw:x.oth });
+    return s;
+  });
+  const tops = segs.map(s=>s.reduce((a,b)=>a+b.v,0));
+  const prevs = rows.map(x=> q.yoy && x.prev.ok ? (x.prev.v||0)/scale : null);
+  const max = Math.max(1e-9, ...tops, ...prevs.filter(v=>v!=null));
+  const step = Math.pow(10,Math.floor(Math.log10(max))), nice=[1,2,2.5,5,10].map(s=>s*step).find(s=>max/s<=5)||step*10;
+  const top = Math.ceil(max/nice)*nice;
+  const tick = v => v.toLocaleString("ja-JP",{maximumFractionDigits:2});
+  const L = 14 + Math.max(...[0,top/2,top].map(v=>tick(v).length))*7.2;
+  const ys=v=>T+(H-T-B)*(1-v/top), bw=(W-L-R)/n, w=Math.min(36,bw*0.64);
+  const labStep = Math.max(1, Math.ceil(n*(Math.max(...rows.map(x=>x.short.length))*7.2+10)/(W-L-R)));
+  let gr="";
+  for (let v=0; v<=top+1e-9; v+=nice) gr+=`<line x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${ys(v)+4}" text-anchor="end">${tick(v)}</text>`;
+  rows.forEach((x,i)=>{
+    const cx=L+bw*i+bw/2; let acc=0;
+    segs[i].forEach((s,j)=>{
+      if (s.v<=0) return;
+      const y0=ys(acc), y1=ys(acc+s.v); acc+=s.v;
+      const isTop = j===segs[i].length-1 || segs[i].slice(j+1).every(t=>t.v<=0);
+      const h=Math.max(0,y0-y1), rad = isTop ? Math.min(4,h/2,w/2) : 0;
+      const path = rad ? `M${cx-w/2},${y0}V${y1+rad}Q${cx-w/2},${y1} ${cx-w/2+rad},${y1}H${cx+w/2-rad}Q${cx+w/2},${y1} ${cx+w/2},${y1+rad}V${y0}Z` : `M${cx-w/2},${y0}V${y1}H${cx+w/2}V${y0}Z`;
+      gr+=`<path d="${path}" fill="${s.color}" stroke="var(--sheet)" stroke-width="${serKeys.length?1.5:0}"><title>${esc(x.name)}　${esc(s.label)}：${esc(fmtM(s.raw))}</title></path>`;
+    });
+    gr+=`<rect x="${cx-bw/2}" y="${T}" width="${bw}" height="${H-T-B}" fill="transparent"><title>${esc(x.name)}　計：${esc(fmtM(x.cur))}${q.yoy?`／前年同期：${esc(fmtM(x.prev))}（${x.yoy.t}）`:""}</title></rect>`;
+    if (i%labStep===0) gr+=`<text x="${cx}" y="${H-B+16}" text-anchor="middle">${esc(x.short)}</text>`;
+  });
+  if (q.yoy && prevs.some(v=>v!=null)){
+    const pts=prevs.map((v,i)=>v==null?null:[L+bw*i+bw/2, ys(v)]);
+    const segsL=[]; let cur=[]; pts.forEach(p=>{ if(p) cur.push(p); else if(cur.length){ segsL.push(cur); cur=[]; } }); if(cur.length) segsL.push(cur);
+    segsL.forEach(sg=>gr+=`<polyline points="${sg.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="5 4"/>`);
+    gr+=pts.map((p,i)=>p?`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--sheet)" stroke="var(--ink-2)" stroke-width="2"><title>${esc(rows[i].name)} 前年同期：${esc(fmtM(rows[i].prev))}</title></circle>`:"").join("");
+  }
+  const leg = [];
+  if (serKeys.length){ serKeys.forEach(k=>leg.push(`<span><span class="sw" style="background:var(--c${S.stack.colors[by][k]})"></span> ${esc(DIMS[by].name(k))}</span>`)); if (withOther) leg.push(`<span><span class="sw" style="background:var(--cother)"></span> その他</span>`); }
+  else leg.push(`<span><span class="sw" style="background:var(--indigo)"></span> ${q.gran==="m"?"当月":"当期"}</span>`);
+  if (q.yoy) leg.push(`<span class="legline">○┄ 前年同期${serKeys.length&&!withOther?"（選択分）":""}</span>`);
+  leg.push(`<span>単位：${esc(unitTxt||"")}</span>`);
+  return `<div class="chart-wrap"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(GRAN_LABEL[q.gran])}推移グラフ" style="${n>12?`min-width:${n*30+80}px`:""}">${gr}</svg></div><div class="row hint legend" style="gap:6px 16px">${leg.join("")}</div>`;
 }
 
 /* ---------- CSV ---------- */
 async function exportCsv(){
-  const { rows, cols } = CURRENT_TABLE; const q=S.result.q;
-  const head = cols.map(c=>c[1] + (["cur","prev"].includes(c[0])?"（千円）":""));
-  const lines = [head, ...rows.map(x=>cols.map(([k])=> k==="yoy"? x.yoy.t : k==="share"? x.share.toFixed(2) : (k==="cur"||k==="prev")? Math.round(x[k]) : x[k]))];
+  const { head, rows } = CURRENT_TABLE; const q=S.result.q, E=S.result.eff;
+  const lines = [head, ...rows];
   const csv = "﻿" + lines.map(l=>l.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  const fn = `通関統計_${q.flow}_${S.tab}_${q.months[0].y}${String(q.months[0].m).padStart(2,"0")}-${q.months.at(-1).y}${String(q.months.at(-1).m).padStart(2,"0")}.csv`;
+  const a0=E.months[0], a1=E.months.at(-1);
+  const fn = `通関統計_${q.flow}_${S.tab==="period"?GRAN_LABEL[q.gran]:DIMS[S.tab].label}_${MEAS[S.measure].replace(/（.*/,"")}_${a0.y}${String(a0.m).padStart(2,"0")}-${a1.y}${String(a1.m).padStart(2,"0")}.csv`;
   if (inArtifact){
     if (!capDownloads){ status("この表示環境ではファイルを保存できません。", true); return; }
     try{ await capDownloads.save({ filename:fn, data:csv }); status("CSVを保存しました。"); }
