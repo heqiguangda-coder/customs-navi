@@ -147,6 +147,13 @@ mark{background:var(--hl);color:inherit;border-radius:2px}
 .serchip:has(input:focus-visible){outline:2px solid var(--indigo);outline-offset:2px}
 .serchip .sv{font-family:var(--f-mono);font-size:.75rem;color:var(--ink-2)}
 .chart-wrap{overflow-x:auto}
+.chart text.pct{fill:var(--ink)}
+.tbl-wrap.freeze{max-height:min(70vh,560px);overflow:auto;overscroll-behavior:contain}
+.freeze table{border-collapse:separate;border-spacing:0}
+.freeze th{position:sticky;top:0;z-index:2;box-shadow:inset 0 -1px var(--rule)}
+.freeze th:first-child,.freeze td:first-child{position:sticky;left:0;z-index:1;background:var(--sheet);box-shadow:inset -1px 0 var(--rule)}
+.freeze th:first-child{z-index:3;background:var(--paper);box-shadow:inset -1px -1px var(--rule)}
+.freeze tbody tr:hover td:first-child{background:linear-gradient(var(--indigo-soft),var(--indigo-soft)),var(--sheet)}
 .legend{flex-wrap:wrap}
 .other-row td{color:var(--ink-2);font-style:italic}
 .seg.small label{padding:6px 4px;font-size:.85rem}
@@ -358,8 +365,12 @@ footer{font-size:.78rem;color:var(--ink-2);border-top:1px solid var(--rule);padd
 const PRISTINE = "<!doctype html>\n" + document.documentElement.outerHTML;
 const EMBED_APPID = /*EMBED*/""/*EMBED*/;
 document.getElementById("nojs").hidden = true;
-const APP = { name:"通関統計ナビ", version:"1.5.0" };
+const APP = { name:"通関統計ナビ", version:"1.6.0" };
 const CHANGELOG = [
+  { v:"1.6.0", date:"2026-11-03", items:[
+    "推移グラフに前年同期比（%）の折れ線と右軸の目盛を追加（「前年同期比」をオンにしたとき）。右軸の目盛は左軸の目盛線にそろえて表示",
+    "グラフの下の表で、見出し行（1行目）と期間の列（1列目）を固定。縦横にスクロールしても見出しが見えたまま",
+  ]},
   { v:"1.5.0", date:"2026-11-03", items:[
     "品目検索で日本独自の9桁（統計品目番号）を品名から検索できるように。税関の輸出統計品目表（2026年1月版）と輸入統計品目表・実行関税率表（2026年10月31日版）の公式品名・単位を収録（約1万2,600件）",
     "9桁には「輸出」「輸入」の区別と単位を表示。輸出と輸入で品名が違う場合は両方を表示",
@@ -419,7 +430,7 @@ const HELP = {
   yoy:["前年同期比","<p>当期の値を前年の同じ期間と比べた増減率です。月別なら前年同月、暦年・年度なら前年・前年度との比較です。</p><p>前年同期比（%）＝（当期 ÷ 前年同期 − 1）× 100</p><p>当期が公表済みの月までしかない場合（例：今年は1〜8月）、前年も同じ1〜8月だけで比べます。前年同期が 0 で当期に実績がある場合は<b>皆増</b>、当期が 0 になった場合は<b>皆減</b>と表示します。</p>"],
   measure:["表示する値（金額・数量・単価）","<p><b>金額</b>：輸出はFOB、輸入はCIF価格（千円単位）。</p><p><b>数量</b>：統計品目ごとに決められた単位（KG＝キログラム、NO＝個数、MT＝メートルトン、L＝リットルなど）で計上されます。品目によっては第2数量（例：個数と重量）もあります。</p><p><b>単価</b>：金額 ÷ 第1数量で計算した平均単価（円／数量単位）です。</p><p>単位の異なる品目は足し合わせられないため、範囲内に複数の単位が混ざると「単位混在」と表示します。数量・単価はHSコードを9桁や6桁で絞り込んだときに意味のある値になります。</p><p>「数量・単価も取得する」をオンにすると、取得件数が約3倍になります。</p>"],
   topn:["上位","<p>当期の値が大きい順に、選んだ件数だけを表示し、残りは「その他（◯件）」の1行にまとめます。並べ替えをしても「その他」は常に最後に表示されます。</p><p>単価を表示しているときは、金額の大きい順で上位を選びます。</p>"],
-  stack:["内訳（積み上げグラフ）","<p>期間ごとの棒グラフを、国別・税関別・HSコード別に色分けして積み上げます。</p><p>下に並ぶ一覧のチェックで、グラフに表示する項目を選べます（最大8件）。色は項目ごとに固定され、選び直しても変わりません。「残りを『その他』で表示」をオンにすると、選ばなかった分を灰色でまとめて積み上げます。</p><p>点線は前年同期の合計です。単価は足し合わせられないため積み上げず、全体の単価を表示します。</p>"],
+  stack:["内訳（積み上げグラフ）","<p>期間ごとの棒グラフを、国別・税関別・HSコード別に色分けして積み上げます。</p><p>下に並ぶ一覧のチェックで、グラフに表示する項目を選べます（最大8件）。色は項目ごとに固定され、選び直しても変わりません。「残りを『その他』で表示」をオンにすると、選ばなかった分を灰色でまとめて積み上げます。</p><p>点線は前年同期の合計です。黒の実線（◆）は前年同期比で、目盛は右軸（%）です。右軸の0%を下回る点は前年より減ったことを表します。単価は足し合わせられないため積み上げず、全体の単価を表示します。</p>"],
   hs:["HSコード","<p>HS（Harmonized System：商品の名称及び分類についての統一システム）による品目分類です。日本の統計品目番号は9桁です。</p><dl><dt>2桁</dt><dd>類（例：87 車両）</dd><dt>4桁</dt><dd>項（例：8703 乗用自動車）</dd><dt>6桁</dt><dd>号。ここまでが国際共通</dd><dt>9桁</dt><dd>日本独自の統計細分</dd></dl><p>輸出と輸入では9桁目までの細分が異なります（輸出統計品目表・輸入統計品目表）。</p>"],
   country:["国・地域","<p>貿易統計の国コード（3桁）で集計します。輸出は仕向国、輸入は原産国が基準です。</p><p>例：105 中華人民共和国、304 アメリカ合衆国、103 大韓民国、106 台湾、601 オーストラリア。</p>"],
   customs:["税関","<p>全国の通関は9つの税関に分かれています：函館・東京・横浜・名古屋・大阪・神戸・門司・長崎・沖縄地区税関。各税関は管内の支署・出張所の分を含みます。</p><p>例えば成田空港は東京税関、関西空港は大阪税関、中部空港は名古屋税関の管内です。</p>"],
@@ -1280,7 +1291,7 @@ function renderPeriod(){
   const unitTxt = unitLabel(rows.find(x=>x.cur.ok&&x.cur.unit)?.cur);
   P.innerHTML = controls(extra) + picker + (note?`<p class="hint">${note}</p>`:"") +
     chartStack(rows, canStack ? serKeys : [], canStack && showOther, by, unitTxt) +
-    `<div class="tbl-wrap"><table><thead><tr>${cols.map(([k,n,cls])=>`<th class="${cls||""}" style="cursor:default">${k.startsWith("s:")?`<span class="sw" style="background:var(--c${S.stack.colors[by][k.slice(2)]})"></span> `:""}${esc(n)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
+    `<div class="tbl-wrap freeze"><table><thead><tr>${cols.map(([k,n,cls])=>`<th class="${cls||""}" style="cursor:default">${k.startsWith("s:")?`<span class="sw" style="background:var(--c${S.stack.colors[by][k.slice(2)]})"></span> `:""}${esc(n)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
   bindControls();
   $("#stackBy").onchange = e=>{ S.stack.by = e.target.value; renderPanel(); };
   const oc=$("#othChk"); if (oc) oc.onchange = e=>{ S.stack.other = e.target.checked; renderPanel(); };
@@ -1295,7 +1306,7 @@ function renderPeriod(){
 }
 function chartStack(rows, serKeys, withOther, by, unitTxt){
   const q=S.result.q, n=rows.length; if(!n) return "";
-  const W=Math.max(640, n*26+80), H=260, R=12, T=14, B=36;
+  const W=Math.max(640, n*26+80), H=260, T=14, B=36;
   const scale = S.measure==="amt" ? UNITS[S.unit][0] : 1;
   const segs = rows.map(x=>{
     if (!serKeys.length) return [{ k:"_tot", v: x.cur.ok ? (x.cur.v||0)/scale : 0, color:"var(--indigo)", label: q.gran==="m"?"当月":"当期", raw:x.cur }];
@@ -1310,10 +1321,27 @@ function chartStack(rows, serKeys, withOther, by, unitTxt){
   const top = Math.ceil(max/nice)*nice;
   const tick = v => v.toLocaleString("ja-JP",{maximumFractionDigits:2});
   const L = 14 + Math.max(...[0,top/2,top].map(v=>tick(v).length))*7.2;
+  // 右軸：前年同期比（%）。左軸の目盛線にそろえて目盛を決める
+  const pcts = rows.map(x=> q.yoy && Number.isFinite(x.yoy.v) ? x.yoy.v : null);
+  const hasP = pcts.some(v=>v!=null);
+  const kInt = Math.round(top/nice);
+  let pLo=0, pStep=1;
+  if (hasP){
+    const pv=pcts.filter(v=>v!=null), lo=Math.min(0,...pv), hi=Math.max(0,...pv), span=Math.max(hi-lo,1e-9);
+    const base=Math.pow(10,Math.floor(Math.log10(span/kInt)));
+    for (const m of [1,2,2.5,5,10,20,25,50,100]){ const st=m*base, b0=Math.floor(lo/st)*st; if (b0+kInt*st >= hi-1e-9){ pStep=st; pLo=b0; break; } }
+  }
+  const pTick = v => (v>0?"+":"") + (+v.toFixed(2)).toLocaleString("ja-JP",{maximumFractionDigits:2}) + "%";
+  const R = hasP ? 14 + Math.max(...Array.from({length:kInt+1},(_,i)=>pTick(pLo+i*pStep).length))*7.2 : 12;
+  const ysP = v => T+(H-T-B)*(1-(v-pLo)/(kInt*pStep));
   const ys=v=>T+(H-T-B)*(1-v/top), bw=(W-L-R)/n, w=Math.min(36,bw*0.64);
   const labStep = Math.max(1, Math.ceil(n*(Math.max(...rows.map(x=>x.short.length))*7.2+10)/(W-L-R)));
   let gr="";
   for (let v=0; v<=top+1e-9; v+=nice) gr+=`<line x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${ys(v)+4}" text-anchor="end">${tick(v)}</text>`;
+  if (hasP){
+    for (let i=0;i<=kInt;i++){ const v=pLo+i*pStep; gr+=`<text x="${W-R+6}" y="${ysP(v)+4}" text-anchor="start" class="pct">${pTick(v)}</text>`; }
+    if (pLo<0) gr+=`<line x1="${L}" x2="${W-R}" y1="${ysP(0)}" y2="${ysP(0)}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="1 3" opacity=".6"/>`;
+  }
   rows.forEach((x,i)=>{
     const cx=L+bw*i+bw/2; let acc=0;
     segs[i].forEach((s,j)=>{
@@ -1333,10 +1361,17 @@ function chartStack(rows, serKeys, withOther, by, unitTxt){
     segsL.forEach(sg=>gr+=`<polyline points="${sg.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="5 4"/>`);
     gr+=pts.map((p,i)=>p?`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--sheet)" stroke="var(--ink-2)" stroke-width="2"><title>${esc(rows[i].name)} 前年同期：${esc(fmtM(rows[i].prev))}</title></circle>`:"").join("");
   }
+  if (hasP){
+    const pts=pcts.map((v,i)=>v==null?null:[L+bw*i+bw/2, ysP(v)]);
+    const segsP=[]; let cur=[]; pts.forEach(p=>{ if(p) cur.push(p); else if(cur.length){ segsP.push(cur); cur=[]; } }); if(cur.length) segsP.push(cur);
+    segsP.forEach(sg=>gr+=`<polyline points="${sg.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`);
+    gr+=pts.map((p,i)=>p?`<rect x="${p[0]-4}" y="${p[1]-4}" width="8" height="8" fill="var(--ink)" stroke="var(--sheet)" stroke-width="1.5" transform="rotate(45 ${p[0]} ${p[1]})"><title>${esc(rows[i].name)} 前年同期比：${rows[i].yoy.t}</title></rect>`:"").join("");
+  }
   const leg = [];
   if (serKeys.length){ serKeys.forEach(k=>leg.push(`<span><span class="sw" style="background:var(--c${S.stack.colors[by][k]})"></span> ${esc(DIMS[by].name(k))}</span>`)); if (withOther) leg.push(`<span><span class="sw" style="background:var(--cother)"></span> その他</span>`); }
   else leg.push(`<span><span class="sw" style="background:var(--indigo)"></span> ${q.gran==="m"?"当月":"当期"}</span>`);
   if (q.yoy) leg.push(`<span class="legline">○┄ 前年同期${serKeys.length&&!withOther?"（選択分）":""}</span>`);
+  if (hasP) leg.push(`<span class="legline">◆─ 前年同期比（右軸・%）</span>`);
   leg.push(`<span>単位：${esc(unitTxt||"")}</span>`);
   return `<div class="chart-wrap"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(GRAN_LABEL[q.gran])}推移グラフ" style="${n>12?`min-width:${n*30+80}px`:""}">${gr}</svg></div><div class="row hint legend" style="gap:6px 16px">${leg.join("")}</div>`;
 }
